@@ -6,6 +6,7 @@ import android.content.Intent
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 
 import android.view.View
 import android.widget.Button
@@ -71,6 +72,55 @@ class ShoppingCartActivity : AppCompatActivity()
         val upArrow = ContextCompat.getDrawable(this, R.drawable.abc_ic_ab_back_material)
         //upArrow?.setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP)
         supportActionBar?.setHomeAsUpIndicator(upArrow)
+        println(intent.hasExtra("action"))
+        if (intent.hasExtra("action")) {
+
+            var str = intent.getStringExtra("action");
+            println(str)
+
+            if(str.equals("succes")) {
+                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
+                dialogBuilder.setTitle("Success")
+                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
+                val dialogLayout = inflater.inflate(R.layout.dialogue, null)
+                dialogBuilder.setView(dialogLayout)
+                    .setCancelable(false)
+                    .setNegativeButton("OK", DialogInterface.OnClickListener {
+                            dialog, id -> dialog.cancel()
+                        goParent()
+                    })
+                val alert = dialogBuilder.create()
+                alert.show()
+            }
+           else if(str.equals("faillure")) {
+
+               println("ic errrrrrrrrrrrrrrrrrror")
+                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
+                dialogBuilder.setTitle("Success")
+                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
+                val dialogLayout = inflater.inflate(R.layout.dialoguefailure, null)
+                dialogBuilder.setView(dialogLayout)
+                    .setCancelable(false)
+                    .setNegativeButton("OK", DialogInterface.OnClickListener {
+                            dialog, id -> dialog.cancel()
+                        goParentsho()
+                    })
+                val alert = dialogBuilder.create()
+                alert.show()
+
+//                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
+//                dialogBuilder.setTitle("faillure")
+//                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
+//                val dialogLayout = inflater.inflate(R.layout.dialoguefailure, null)
+//                dialogBuilder.setView(dialogLayout)
+//                    .setCancelable(false)
+//                    .setNegativeButton("OK", DialogInterface.OnClickListener {
+//                            dialog, id -> dialog.cancel()
+//
+//                    })
+            }
+
+        }
 
         var list: MutableList<CartItem>? =ShoppingCart.getCart()
         if(list!=null){
@@ -180,7 +230,7 @@ class ShoppingCartActivity : AppCompatActivity()
 
     private fun goechec() {
         val bundle = Bundle()
-        val intent = Intent(this, ForgotPass::class.java)
+        val intent = Intent(this, ShoppingCartActivity::class.java)
         bundle.putString("action", "faillure")
         intent.putExtras(bundle)
 
@@ -352,7 +402,7 @@ class ShoppingCartActivity : AppCompatActivity()
     private fun goparent(string: String, string1: String, string2: String, string3: String) {
         ShoppingCart.deleteCart()
         val bundle = Bundle()
-        val intent = Intent(this, ForgotPass::class.java)
+        val intent = Intent(this, ShoppingCartActivity::class.java)
         bundle.putString("action", "succes")
         bundle.putString("firstname", string)
         bundle.putString("lastName", string1)
@@ -388,6 +438,15 @@ class ShoppingCartActivity : AppCompatActivity()
 
     fun refreshActivtiy() {
         recreate();
+    }
+    private fun goParentsho() {
+        val intent = Intent(this, ShoppingCartActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun goParent() {
+        val intent = Intent(this, ProfilActivity::class.java)
+        startActivity(intent)
     }
 
 
