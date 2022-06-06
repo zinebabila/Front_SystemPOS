@@ -18,6 +18,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieDrawable
 import com.example.systemposfront.bo.*
 import com.example.systemposfront.bo.Currency
 import com.example.systemposfront.controller.CouponController
@@ -79,23 +81,19 @@ class ShoppingCartActivity : AppCompatActivity()
             println(str)
 
             if(str.equals("succes")) {
-                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
-                dialogBuilder.setTitle("Success")
-                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
-                val dialogLayout = inflater.inflate(R.layout.dialogue, null)
-                dialogBuilder.setView(dialogLayout)
-                    .setCancelable(false)
-                    .setNegativeButton("OK", DialogInterface.OnClickListener {
-                            dialog, id -> dialog.cancel()
-                        goParent()
-                    })
-                val alert = dialogBuilder.create()
-                alert.show()
+                val animationView: LottieAnimationView = findViewById(R.id.animation_view1)
+                animationView.setAnimation(R.raw.successful)
+                animationView.repeatCount = 3
+                animationView.playAnimation()
+                animationView.setOnClickListener(View.OnClickListener {
+                    goParent()
+                })
+
             }
            else if(str.equals("faillure")) {
 
                println("ic errrrrrrrrrrrrrrrrrror")
-                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
+               /* val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
                 dialogBuilder.setTitle("Success")
                 val inflater = LayoutInflater.from(this@ShoppingCartActivity)
                 val dialogLayout = inflater.inflate(R.layout.dialoguefailure, null)
@@ -103,21 +101,19 @@ class ShoppingCartActivity : AppCompatActivity()
                     .setCancelable(false)
                     .setNegativeButton("OK", DialogInterface.OnClickListener {
                             dialog, id -> dialog.cancel()
-                        goParentsho()
+
                     })
                 val alert = dialogBuilder.create()
-                alert.show()
+                alert.show()*/
 
-//                val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
-//                dialogBuilder.setTitle("faillure")
-//                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
-//                val dialogLayout = inflater.inflate(R.layout.dialoguefailure, null)
-//                dialogBuilder.setView(dialogLayout)
-//                    .setCancelable(false)
-//                    .setNegativeButton("OK", DialogInterface.OnClickListener {
-//                            dialog, id -> dialog.cancel()
-//
-//                    })
+                val animationView: LottieAnimationView = findViewById(R.id.animation_view1)
+                animationView.setAnimation(R.raw.paymentfailed)
+                animationView.repeatCount = 3
+                animationView.playAnimation()
+                animationView.setOnClickListener(View.OnClickListener {
+                    goParentsho()
+                })
+
             }
 
         }
