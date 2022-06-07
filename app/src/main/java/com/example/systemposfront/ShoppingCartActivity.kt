@@ -1,5 +1,6 @@
 package com.example.systemposfront
 import CurrencyAdapter
+import android.app.Dialog
 import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -81,41 +83,62 @@ class ShoppingCartActivity : AppCompatActivity()
             println(str)
 
             if(str.equals("succes")) {
-                val animationView: LottieAnimationView = findViewById(R.id.animation_view1)
+                val dialog = Dialog(this, R.style.DialogStyle)
+                dialog.setContentView(R.layout.layout_costumer_dialogue_pay)
+                dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                var texttitle:TextView=dialog.findViewById(R.id.txttite2)
+                texttitle.text="Successful payment"
+                val animationView: LottieAnimationView = dialog.findViewById(R.id.animation_view2)
                 animationView.setAnimation(R.raw.successful)
-                animationView.repeatCount = 3
+                animationView.repeatCount = 100
                 animationView.playAnimation()
-                animationView.setOnClickListener(View.OnClickListener {
-                    goParent()
+                var textview:TextView=dialog.findViewById(R.id.txtDesc2)
+                var nom = intent.getStringExtra("firstname");
+                var prenom = intent.getStringExtra("lastName");
+                var currency = intent.getStringExtra("nameCurency");
+                var sum = intent.getStringExtra("somme");
+
+                textview.text="the client "+nom+" " +prenom+" "+" has paid "+ sum+" "+currency
+
+                val btnClose: ImageView = dialog.findViewById(R.id.btn_close2)
+
+                btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    intent.removeExtra("action")
+                })
+                var btnYes:Button=dialog.findViewById(R.id.btn_yes2)
+                btnYes.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    intent.removeExtra("action")
                 })
 
+                dialog.show()
+
             }
-           else if(str.equals("faillure")) {
-
-               println("ic errrrrrrrrrrrrrrrrrror")
-               /* val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)
-                dialogBuilder.setTitle("Success")
-                val inflater = LayoutInflater.from(this@ShoppingCartActivity)
-                val dialogLayout = inflater.inflate(R.layout.dialoguefailure, null)
-                dialogBuilder.setView(dialogLayout)
-                    .setCancelable(false)
-                    .setNegativeButton("OK", DialogInterface.OnClickListener {
-                            dialog, id -> dialog.cancel()
-
-                    })
-                val alert = dialogBuilder.create()
-                alert.show()*/
-
-                val animationView: LottieAnimationView = findViewById(R.id.animation_view1)
+            if(str.equals("faillure")) {
+                val dialog = Dialog(this, R.style.DialogStyle)
+                dialog.setContentView(R.layout.layout_costumer_dialogue_pay)
+                dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                var texttitle:TextView=dialog.findViewById(R.id.txttite2)
+                texttitle.text="Payment failed"
+                val animationView: LottieAnimationView = dialog.findViewById(R.id.animation_view2)
                 animationView.setAnimation(R.raw.paymentfailed)
-                animationView.repeatCount = 3
+                animationView.repeatCount = 100
                 animationView.playAnimation()
-                animationView.setOnClickListener(View.OnClickListener {
-                    goParentsho()
+                var textview:TextView=dialog.findViewById(R.id.txtDesc2)
+                textview.text=""
+
+                val btnClose: ImageView = dialog.findViewById(R.id.btn_close2)
+
+                btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    intent.removeExtra("action")
+                })
+                var btnYes:Button=dialog.findViewById(R.id.btn_yes2)
+                btnYes.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    intent.removeExtra("action")
                 })
 
-            }
+                dialog.show()
 
+            }
         }
 
         var list: MutableList<CartItem>? =ShoppingCart.getCart()
@@ -242,16 +265,24 @@ class ShoppingCartActivity : AppCompatActivity()
                 println(t.message + "*******************************")
                 println("null")
                 t.message?.let { Log.d("Data error", it) }
-                val builder: AlertDialog.Builder = AlertDialog.Builder(this@ShoppingCartActivity)
-                builder.setMessage("Wrong Code ?")
-                builder.setTitle("Alert !")
-                builder.setCancelable(false)
-                    .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                            dialog, id -> dialog.cancel()
-                    })
-                val alert = builder.create()
-                alert.show()
 
+                val dialog = Dialog(this@ShoppingCartActivity, R.style.DialogStyle)
+                dialog.setContentView(R.layout.layout_custom_dialog)
+                dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                texttitle.text="Alert !"
+
+                var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                textview.text="Wrong Code ?"
+                val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
+
+                btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                })
+                var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                btnYes.setOnClickListener(View.OnClickListener {
+                    dialog.dismiss()
+                } )
+                dialog.show()
             }
 
             override fun onResponse(call: Call<Coupon>, response: Response<Coupon>)
@@ -267,51 +298,69 @@ class ShoppingCartActivity : AppCompatActivity()
                 var acutel=simpleDateFormat.parse(dateTime)
 
                 if(formattedDate.before(acutel)){
-                    val builder: AlertDialog.Builder = AlertDialog.Builder(this@ShoppingCartActivity)
-                    builder.setMessage("Code is expired ?")
-                    builder.setTitle("Alert !")
-                    builder.setCancelable(false)
-                        .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                                dialog, id -> dialog.cancel()
-                        })
-                    val alert = builder.create()
-                    alert.show()
+                    val dialog = Dialog(this@ShoppingCartActivity, R.style.DialogStyle)
+                    dialog.setContentView(R.layout.layout_custom_dialog)
+                    dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                    var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                    texttitle.text="Alert !"
+
+                    var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                    textview.text="Code is expired ?"
+                    val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
+
+                    btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    })
+                    var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                    btnYes.setOnClickListener(View.OnClickListener {
+                        dialog.dismiss()
+                    } )
+                    dialog.show()
                 }
                 else{
                     if(coupon!!.num_Uses==coupon!!.maxnum_Uses){
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(this@ShoppingCartActivity)
-                        builder.setMessage("Copon Coupon is cannot be used!!")
-                        builder.setTitle("Alert !")
-                        builder.setCancelable(false)
-                            .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                                    dialog, id -> dialog.cancel()
-                            })
-                        val alert = builder.create()
-                        alert.show()
+
+                        val dialog = Dialog(this@ShoppingCartActivity, R.style.DialogStyle)
+                        dialog.setContentView(R.layout.layout_custom_dialog)
+                        dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                        var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                        texttitle.text="Alert !"
+
+                        var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                        textview.text="Copon Coupon is cannot be used!!"
+                        val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
+
+                        btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                        })
+                        var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                        btnYes.setOnClickListener(View.OnClickListener {
+                            dialog.dismiss()
+                        } )
+                        dialog.show()
                     }
 
 
                     else {
-
-
                         var prix = calculerprix(coupon!!.reduction)
                         val df = DecimalFormat("0.00") // import java.text.DecimalFormat;
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(this@ShoppingCartActivity)
-                        builder.setMessage(
-                            "Code is validated \n the total price is " + df.format(
-                                prix
-                            ) + "$"
-                        )
-                        builder.setTitle("Success !")
-                        builder.setCancelable(false)
-                            .setNegativeButton(
-                                "Cancel",
-                                DialogInterface.OnClickListener { dialog, id ->
-                                    dialog.cancel()
-                                })
-                        val alert = builder.create()
-                        alert.show()
+                        val dialog = Dialog(this@ShoppingCartActivity, R.style.DialogStyle)
+                        dialog.setContentView(R.layout.costom_dialogue_scc)
+                        dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                        var texttitle:TextView=dialog.findViewById(R.id.txttite1)
+                        texttitle.text="Success !"
 
+                        var textview:TextView=dialog.findViewById(R.id.txtDesc1)
+                        textview.text="Code is validated \n the total price is " + df.format(
+                            prix
+                        ) + "$"
+                        val btnClose: ImageView = dialog.findViewById(R.id.btn_close1)
+
+                        btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                        })
+                        var btnYes:Button=dialog.findViewById(R.id.btn_yes1)
+                        btnYes.setOnClickListener(View.OnClickListener {
+                            dialog.dismiss()
+                        } )
+                        dialog.show()
                         modifierprixApresCoupon(df.format(prix))
                     }
 

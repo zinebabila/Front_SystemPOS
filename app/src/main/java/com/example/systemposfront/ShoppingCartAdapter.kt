@@ -1,5 +1,6 @@
 package com.example.systemposfront
 
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.view.LayoutInflater
@@ -65,14 +66,15 @@ class ShoppingCartAdapter(var context: Context, var cartItems: List<CartItem>) :
             val t1  = itemView.findViewById< TextView>(R.id.t11)
             val t2  = itemView.findViewById< TextView>(R.id.t22)
             val t3  = itemView.findViewById< TextView>(R.id.t33)
-            val remov=itemView.findViewById<Button>(R.id.button)
+            val remov=itemView.findViewById<ImageView>(R.id.button)
              t2.text="${cart.quantity.toString()}"
 
             t1.setOnClickListener(View.OnClickListener {
                 var y: Int = t2.getText().toString().toInt()
                 y--
                 if (y == 0) {
-                    inc.setVisibility(View.GONE)
+                    ShoppingCart.removeItem(cart,itemView.context as ShoppingCartActivity)
+                    (itemView.context as ShoppingCartActivity).refreshActivtiy()
                 } else {
                     t2.setText(y.toString())
                     ShoppingCart.modifier(cart,t2.text.toString().toInt())
@@ -88,15 +90,23 @@ class ShoppingCartAdapter(var context: Context, var cartItems: List<CartItem>) :
                 var y: Int = t2.getText().toString().toInt()
                 y++
                 if(y>=cart.product.qteStock){
-                    val builder: AlertDialog.Builder = AlertDialog.Builder(itemView.context as ShoppingCartActivity)
-                    builder.setMessage("No enought stock ?")
-                    builder.setTitle("Alert !")
-                    builder.setCancelable(false)
-                        .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                                dialog, id -> dialog.cancel()
-                        })
-                    val alert = builder.create()
-                    alert.show()
+                    val dialog = Dialog(itemView.context as ProfilActivity, R.style.DialogStyle)
+                    dialog.setContentView(R.layout.layout_custom_dialog)
+                    dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                    var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                    texttitle.text="Alert !"
+
+                    var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                    textview.text="No enought Stock"
+                    val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
+
+                    btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    })
+                    var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                    btnYes.setOnClickListener(View.OnClickListener {
+                        dialog.dismiss()
+                    } )
+                    dialog.show()
                 }
                 else{
                     t2.setText(y.toString())

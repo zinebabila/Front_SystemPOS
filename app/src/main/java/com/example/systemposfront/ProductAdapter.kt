@@ -1,5 +1,6 @@
 package com.example.systemposfront
 
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.graphics.drawable.Drawable
@@ -73,7 +74,7 @@ class ProductAdapter(var context: Context, var products: List<Product> = arrayLi
             }
 
             Picasso.get().load(product.images[0].urlImage).fit().into(itemImage)
-
+if(product.qteStock!=0){
             Observable.create(ObservableOnSubscribe<MutableList<CartItem>> {
 
                 itemAdd.setOnClickListener { view ->
@@ -179,6 +180,8 @@ class ProductAdapter(var context: Context, var products: List<Product> = arrayLi
 
                 Toast.makeText(itemView.context, "Cart size $quantity", Toast.LENGTH_SHORT).show()
             }
+        }
+
         }
 
 

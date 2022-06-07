@@ -2,6 +2,7 @@ package com.example.systemposfront
 
 
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
@@ -67,111 +68,154 @@ class MovieAdapter(itemList: ArrayList<Product>) :
         }
 
         Picasso.get().load(currentItem.images[0].urlImage).fit().into(holder.itemImage)
+        if (currentItem.qteStock != 0) {
+            Observable.create(ObservableOnSubscribe<MutableList<CartItem>> {
 
-        Observable.create(ObservableOnSubscribe<MutableList<CartItem>> {
+                holder.itemAdd.setOnClickListener { view ->
+                    val dialog = Dialog(holder.itemView.context as ProfilActivity, R.style.DialogStyle)
+                    dialog.setContentView(R.layout.dialog_signin)
+                    dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                    var texttitle:TextView=dialog.findViewById(R.id.txttiteq)
+                    texttitle.text="Quantity choice"
 
+                    var textview:TextView=dialog.findViewById(R.id.txtDescq)
+                    textview.text="You want to add ${currentItem.title} to your cart" +
+                            "choose quantity"
+                    val inc = dialog.findViewById<LinearLayout>(R.id.inc)
+                    val t2 = dialog.findViewById<TextView>(R.id.t2)
+                    val t1 = dialog.findViewById<TextView>(R.id.t1)
+                    val t3 = dialog.findViewById<TextView>(R.id.t3)
+                    val btnClose: ImageView = dialog.findViewById(R.id.btn_closeq)
+                    btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                    })
+                    var btnYes:Button=dialog.findViewById(R.id.btn_yesq)
+                    btnYes.setOnClickListener(View.OnClickListener {
+                        dialog.dismiss()
+
+
+                        val item = CartItem(currentItem)
+                        println(t2.text.toString().toInt())
+                        val cart = ShoppingCart.getCart()
+                        val targetItem = cart?.singleOrNull { it.product?.id == currentItem?.id }
+                        if (targetItem != null) {
+                            if(targetItem.quantity+t2.text.toString().toInt()<=currentItem.qteStock){
+                                Toast.makeText(
+                                    (holder.itemView.context as ProfilActivity).applicationContext,
+                                    t2.text.toString() + "  ${currentItem.title} added to your cart ",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                ShoppingCart.addItem(item, t2.text.toString().toInt())
+                                (holder.itemView.context as ProfilActivity).refreshActivtiy()}
+                            else{
+                                dialog.dismiss()
+                                val dialog = Dialog(holder.itemView.context as ProfilActivity, R.style.DialogStyle)
+                                dialog.setContentView(R.layout.layout_custom_dialog)
+                                dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                                var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                                texttitle.text="Alert !"
+
+                                var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                                textview.text="No enought Stock"
+                                val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
+
+                                btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
+                                })
+                                var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                                btnYes.setOnClickListener(View.OnClickListener {
+                                    dialog.dismiss()
+                                } )
+                                dialog.show()
+                            }
+                        }
+                        else{
+                            Toast.makeText(
+                                (holder.itemView.context as ProfilActivity).applicationContext,
+                                t2.text.toString() + "  ${currentItem.title} added to your cart ",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            ShoppingCart.addItem(item, t2.text.toString().toInt())
+                            (holder.itemView.context as ProfilActivity).refreshActivtiy()
+                        }
+
+                    } )
+                    dialog.show()
+
+
+
+                    t1.setOnClickListener(View.OnClickListener {
+                        var y: Int = t2.getText().toString().toInt()
+                        y--
+                        if(t2.getText().toString().toInt()>1) {
+                            t2.setText(y.toString())
+                        }
+                    })
+
+                    t3.setOnClickListener(View.OnClickListener {
+                        var y: Int = t2.getText().toString().toInt()
+                        y++
+                        if (y > currentItem.qteStock) {
+                            val builder: AlertDialog.Builder =
+                                AlertDialog.Builder(holder.itemView.context as ProfilActivity)
+                            builder.setMessage("No enought stock ?")
+                            builder.setTitle("Alert !")
+                            builder.setCancelable(false)
+                                .setNegativeButton(
+                                    "Cancel",
+                                    DialogInterface.OnClickListener { dialog, id ->
+                                        dialog.cancel()
+                                    })
+                            val alert = builder.create()
+                            alert.show()
+                        } else {
+                            t2.setText(y.toString())
+                        }
+
+                        // (itemView.context as ProfilActivity).modifiercounter()
+                        // cart.quantity=t2.text.toString().toInt()
+
+
+                    })
+
+
+                }
+
+            }).subscribe { cart ->
+
+                var quantity = 0
+
+                cart.forEach { cartItem ->
+
+                    quantity += cartItem.quantity
+                }
+
+                (holder.itemView.context as ProfilActivity).cart_size.text = quantity.toString()
+
+                Toast.makeText(holder.itemView.context, "Cart size $quantity", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
+        else{
             holder.itemAdd.setOnClickListener { view ->
 
-                //notify users
-                /*  Snackbar.make(
-                    (itemView.context as ProfilActivity).coordinator,
-                    "${product.title} added to your cart",
-                    Snackbar.LENGTH_LONG
-                ).show()
-                */
-                val dialogBuilder = AlertDialog.Builder(holder.itemView.context as ProfilActivity)
-                dialogBuilder.setTitle("Quantity choice")
-                // set message of alert dialog
-                dialogBuilder.setMessage("You want to add ${currentItem.title} to your cart" +
-                        "choose quantity")
-                val inflater = LayoutInflater.from(holder.itemView.context as ProfilActivity)
-                val dialogLayout = inflater.inflate(R.layout.dialog_signin, null)
-                val inc  = dialogLayout.findViewById<LinearLayout>(R.id.inc)
-                inc.setVisibility(View.VISIBLE)
-                val t2  = dialogLayout.findViewById< TextView>(R.id.t2)
-                dialogBuilder.setView(dialogLayout)
-                    // if the dialog is cancelable
-                    .setCancelable(false)
-                    // positive button text and action
-                    // negative button text and action
+                val dialog = Dialog(holder.itemView.context as ProfilActivity, R.style.DialogStyle)
+                dialog.setContentView(R.layout.layout_custom_dialog)
+                dialog.getWindow()?.setBackgroundDrawableResource(R.drawable.bg_window)
+                var texttitle:TextView=dialog.findViewById(R.id.txttite)
+                texttitle.text="Alert !"
 
-                    .setPositiveButton("OK") { dialogInterface,
-                                               i -> Toast.makeText((holder.itemView.context as ProfilActivity).applicationContext,
-                        t2.text.toString()+ "  ${currentItem.title} added to your cart " ,
-                        Toast.LENGTH_SHORT).show()
+                var textview:TextView=dialog.findViewById(R.id.txtDesc)
+                textview.text="Product is out of stock"
+                val btnClose: ImageView = dialog.findViewById(R.id.btn_close)
 
-                        val item = CartItem(currentItem )
-                        println(t2.text.toString().toInt())
-
-                        ShoppingCart.addItem(item,t2.text.toString().toInt())
-                        (holder.itemView.context as ProfilActivity).refreshActivtiy()
-                    }
-                    .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                            dialog, id -> dialog.cancel()
-                    })
-                // .setPositiveButton("OK") { dialog, (itemView.context as ProfilActivity).refreshActivtiy()
-
-                // create dialog box
-
-
-                val t1  = dialogLayout.findViewById< TextView>(R.id.t1)
-
-                val t3  = dialogLayout.findViewById< TextView>(R.id.t3)
-
-
-                t1.setOnClickListener(View.OnClickListener {
-                    var y: Int = t2.getText().toString().toInt()
-                    y--
-                    if (y == 0) {
-                        inc.setVisibility(View.GONE)
-                    } else {
-                        t2.setText(y.toString())
-                    }
+                btnClose.setOnClickListener(View.OnClickListener { dialog.dismiss()
                 })
-
-                t3.setOnClickListener(View.OnClickListener {
-                    var y: Int = t2.getText().toString().toInt()
-                    y++
-                    if(y>=currentItem.qteStock){
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context as ProfilActivity)
-                        builder.setMessage("No enought stock ?")
-                        builder.setTitle("Alert !")
-                        builder.setCancelable(false)
-                            .setNegativeButton("Cancel", DialogInterface.OnClickListener {
-                                    dialog, id -> dialog.cancel()
-                            })
-                        val alert = builder.create()
-                        alert.show()
-                    }
-                    else{
-                        t2.setText(y.toString())
-                    }
-
-                    // (itemView.context as ProfilActivity).modifiercounter()
-                    // cart.quantity=t2.text.toString().toInt()
-
-
-                })
-
-                val alert = dialogBuilder.create()
-                // set title for alert dialog box
-                // show alert dialog
-                alert.show()
-
+                var btnYes:Button=dialog.findViewById(R.id.btn_yes)
+                btnYes.setOnClickListener(View.OnClickListener {
+                    dialog.dismiss()
+                } )
+                dialog.show()
             }
-
-        }).subscribe { cart ->
-
-            var quantity = 0
-
-            cart.forEach { cartItem ->
-
-                quantity += cartItem.quantity
-            }
-
-            (holder.itemView.context as ProfilActivity).cart_size.text = quantity.toString()
-
-            Toast.makeText(holder.itemView.context, "Cart size $quantity", Toast.LENGTH_SHORT).show()
         }
     }
 

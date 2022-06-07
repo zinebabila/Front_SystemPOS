@@ -1,11 +1,16 @@
 
 package com.example.systemposfront
 
+
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.SearchView
@@ -13,6 +18,7 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.NotificationCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -200,33 +206,6 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
         super.onPostCreate(savedInstanceState)
         toggle.syncState()
     }
-    /*search.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-        var timer = Timer()
-
-        override fun onQueryTextSubmit(query: String?): Boolean {
-            return false
-        }
-
-        override fun onQueryTextChange(newText: String): Boolean {
-            timer.cancel()
-            val sleep = when(newText.length) {
-                1 -> 1000L
-                2,3 -> 700L
-                4,5 -> 500L
-                else -> 300L
-            }
-            timer = Timer()
-           /* timer.schedule(sleep) {
-                if (!newText.isNullOrEmpty()) {
-                    // search
-                }*/
-            }
-            return true
-        }
-
-    })
-*/
-
     private fun getproductcat(id: Long): Int {
 
         //  var products_recyclerview: RecyclerView = findViewById(R.id.products_recyclerview)
@@ -339,6 +318,49 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 return false
             }
         })
+
+        val notification=menu.findItem(R.id.notification).actionView
+notification.setOnClickListener(View.OnClickListener {
+  //  showinboxstylenotification();
+})
+
+
+
         return true
     }
+//    private fun showinboxstylenotification() {
+//        //Style of notifiction is inbox style
+//        val inboxstyle = NotificationCompat.InboxStyle()
+//        inboxstyle.setBigContentTitle("Inbox style notification")
+//        inboxstyle.addLine("Line one")
+//        inboxstyle.addLine("Line two")
+//        inboxstyle.addLine("Line three")
+//        val builder = NotificationCompat.Builder(this@ProfilActivity)
+//        builder.setContentTitle("Inbox Style Notification")
+//        builder.setContentText("Hello all \n This is my first inbox style notification")
+//        //builder.setSmallIcon(R.drawable.ic_action_email)
+//        builder.setTicker("Inbox Notification")
+//        builder.setAutoCancel(true)
+//        builder.setStyle(inboxstyle)
+//       // val i = Intent(this@MainActivity, Inbox_Activity::class.java)
+//      //  val stackbuilder: TaskStackBuilder = TaskStackBuilder.create(this@ProfilActivity)
+//      //  stackbuilder.addParentStack(Inbox_Activity::class.java)
+//       // stackbuilder.addNextIntent(i)
+////        val pending_intent: PendingIntent =
+////            stackbuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+////
+////        //for the actio button
+////        val replyintent = Intent(this@MainActivity, Reply_activity::class.java)
+////        val stackbuilder_reply: TaskStackBuilder = TaskStackBuilder.create(this@MainActivity)
+////        stackbuilder_reply.addParentStack(Reply_activity::class.java)
+////        stackbuilder_reply.addNextIntent(replyintent)
+////        val pending_intent_reply: PendingIntent =
+////            stackbuilder_reply.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+////        builder.setContentIntent(pending_intent)
+////        builder.setContentIntent(pending_intent_reply)
+////        builder.addAction(R.drawable.ic_action_email, "Reply", pending_intent_reply)
+////        val notification: Notification = builder.build()
+////        val manager = this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+////        manager.notify(INBOX_ID, notification)
+//    }
 }
