@@ -2,15 +2,11 @@
 package com.example.systemposfront
 
 
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.SearchView
@@ -18,7 +14,7 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,6 +45,7 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private lateinit var apimerchant:MerchantController
     private lateinit var cat: CategorieController
 
+    private var notificationManager: NotificationManagerCompat? = null
     private lateinit var productAdapter: MovieAdapter
     private lateinit var drawer: DrawerLayout
     private lateinit var toggle: ActionBarDrawerToggle
@@ -62,6 +59,8 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         session = TokenManager(applicationContext)
         setContentView(R.layout.activity_profil)
+      //  createNotificationChannels()
+        notificationManager = NotificationManagerCompat.from(this);
         mNavigationView  = findViewById(R.id.nav_view)
         menuNav    = mNavigationView.menu
         val toolbar: Toolbar = findViewById(R.id.toolbar_main)
@@ -81,10 +80,12 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         /***********************les information du compte**********************/
         AccountEnd.authToken = session.gettokenDetails()
-        if(session.gettypeAccount()=="M") {
+
             apimerchant = AccountEnd.retrofit.create(MerchantController::class.java)
             apimerchant.getMerchant(session.getidAccount()).enqueue(object : retrofit2.Callback<Merchant> {
                 override fun onResponse(call: Call<Merchant>, response: Response<Merchant>) {
+                    println(response.body()!!.firstName)
+                    println(response.body()!!.lastName)
                     if (response.body() != null) {
                         var merchant = response.body()!!
 
@@ -104,10 +105,6 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 }
 
             })
-        }
-        else{
-            println("n'est pas merchant est un caissier")
-        }
 
 
 
@@ -319,48 +316,20 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
             }
         })
 
-        val notification=menu.findItem(R.id.notification).actionView
-notification.setOnClickListener(View.OnClickListener {
-  //  showinboxstylenotification();
-})
+
+
+        val notification=menu.findItem(R.id.notification)
+        notification.setOnMenuItemClickListener(MenuItem.OnMenuItemClickListener {
+            val intent = Intent(this@ProfilActivity, NotificationActivity::class.java)
+            startActivity(intent)
+             false
+        })
+
 
 
 
         return true
     }
-//    private fun showinboxstylenotification() {
-//        //Style of notifiction is inbox style
-//        val inboxstyle = NotificationCompat.InboxStyle()
-//        inboxstyle.setBigContentTitle("Inbox style notification")
-//        inboxstyle.addLine("Line one")
-//        inboxstyle.addLine("Line two")
-//        inboxstyle.addLine("Line three")
-//        val builder = NotificationCompat.Builder(this@ProfilActivity)
-//        builder.setContentTitle("Inbox Style Notification")
-//        builder.setContentText("Hello all \n This is my first inbox style notification")
-//        //builder.setSmallIcon(R.drawable.ic_action_email)
-//        builder.setTicker("Inbox Notification")
-//        builder.setAutoCancel(true)
-//        builder.setStyle(inboxstyle)
-//       // val i = Intent(this@MainActivity, Inbox_Activity::class.java)
-//      //  val stackbuilder: TaskStackBuilder = TaskStackBuilder.create(this@ProfilActivity)
-//      //  stackbuilder.addParentStack(Inbox_Activity::class.java)
-//       // stackbuilder.addNextIntent(i)
-////        val pending_intent: PendingIntent =
-////            stackbuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-////
-////        //for the actio button
-////        val replyintent = Intent(this@MainActivity, Reply_activity::class.java)
-////        val stackbuilder_reply: TaskStackBuilder = TaskStackBuilder.create(this@MainActivity)
-////        stackbuilder_reply.addParentStack(Reply_activity::class.java)
-////        stackbuilder_reply.addNextIntent(replyintent)
-////        val pending_intent_reply: PendingIntent =
-////            stackbuilder_reply.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-////        builder.setContentIntent(pending_intent)
-////        builder.setContentIntent(pending_intent_reply)
-////        builder.addAction(R.drawable.ic_action_email, "Reply", pending_intent_reply)
-////        val notification: Notification = builder.build()
-////        val manager = this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-////        manager.notify(INBOX_ID, notification)
-//    }
+
+
 }

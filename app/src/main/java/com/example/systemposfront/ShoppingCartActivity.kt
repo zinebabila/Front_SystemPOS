@@ -1,9 +1,12 @@
 package com.example.systemposfront
 import CurrencyAdapter
-import android.app.Dialog
+import android.app.*
+import android.app.Notification
 import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +19,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -60,7 +65,10 @@ class ShoppingCartActivity : AppCompatActivity()
     private lateinit var curencyAdapter: CurrencyAdapter
     lateinit var currencys_recyclerview: RecyclerView
     var contentEt:String?=null
-
+    var CHANNEL_1_ID = "channel1"
+    var  CHANNEL_2_ID = "channel2"
+    private var notificationManager: NotificationManagerCompat? = null
+    private var notificationManagerPro: NotificationManagerCompat? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,7 +212,37 @@ class ShoppingCartActivity : AppCompatActivity()
 
                 if(!data.equals("connexion")) {
                     var json = JSONObject(data)
+
                     if (json.getInt("type") == 1) {
+                        var stringRve:String=json.getString("descripReview").toString()
+                        var stringPro:String=json.getString("descripProduct").toString()
+                        println(stringRve)
+                            println("is Review notification")
+                            var title: String = "Hello Command Notification"
+                        var message:String =""
+                        if(!stringPro.equals("null")){
+                              message = message+stringPro+"\n"}
+                        if(!stringRve.equals("null")){
+                             message =message+"\n"+stringRve}
+                            var activity: Intent =
+                                Intent(this@ShoppingCartActivity, ShoppingCartActivity::class.java)
+                            var contentintent: PendingIntent =
+                                PendingIntent.getActivity(this@ShoppingCartActivity, 0, activity, 0)
+                            val notification: Notification =
+                                NotificationCompat.Builder(this@ShoppingCartActivity, CHANNEL_1_ID)
+                                    .setSmallIcon(R.drawable.bg_window)
+                                    .setContentTitle(title)
+                                    .setContentText(message)
+                                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                                    .setColor(Color.BLUE)
+                                    .setContentIntent(contentintent)
+                                    .setAutoCancel(true)
+                                    .setOnlyAlertOnce(true)
+                                    .build()
+                            notificationManager?.notify(1, notification);
+
+
                         goparent(
                             json.getString("firstname"),
                             json.getString("lastName"),
@@ -217,6 +255,10 @@ class ShoppingCartActivity : AppCompatActivity()
                         println("faillure")
                         goechec()
                     }
+
+
+
+
                 }
             }
 
@@ -233,7 +275,7 @@ class ShoppingCartActivity : AppCompatActivity()
             .build()
 
         val request = Request.Builder()
-            .url("http://192.168.86.23:9090/data/subscribes")
+            .url("http://192.168.86.32:9090/data/subscribes")
             // .header("Accept", "application/json; q=0.5")
             // .addHeader("Accept", "text/event-stream")
 
@@ -242,11 +284,34 @@ class ShoppingCartActivity : AppCompatActivity()
 
         EventSources.createFactory(client)
             .newEventSource(request = request, listener = eventSourceListener)
+        notificationManager = NotificationManagerCompat.from(this);
+        notificationManagerPro = NotificationManagerCompat.from(this);
+         createNotificationChannels()
 
 
 
     }
-
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel1 = NotificationChannel(
+                CHANNEL_1_ID,
+                "Channel 1",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channel1.description = "This is Channel 1"
+            val channel2 = NotificationChannel(
+                CHANNEL_2_ID,
+                "Channel 2",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            channel2.description = "This is Channel 2"
+            val manager = getSystemService(
+                NotificationManager::class.java
+            )
+            manager.createNotificationChannel(channel1)
+            manager.createNotificationChannel(channel2)
+        }
+    }
     private fun goechec() {
         val bundle = Bundle()
         val intent = Intent(this, ShoppingCartActivity::class.java)
@@ -396,7 +461,7 @@ class ShoppingCartActivity : AppCompatActivity()
     private fun afficher_devise() {
 
 
-        apiService.getMerchant(1).enqueue(object : retrofit2.Callback<Merchant> {
+        apiService.getMerchant(session.getidAccount()).enqueue(object : retrofit2.Callback<Merchant> {
             // apiService.getCategorie().enqueue(object : retrofit2.Callback<List<Category>> {
             override fun onFailure(call: Call<Merchant>, t: Throwable) {
 
@@ -483,15 +548,6 @@ class ShoppingCartActivity : AppCompatActivity()
 
     fun refreshActivtiy() {
         recreate();
-    }
-    private fun goParentsho() {
-        val intent = Intent(this, ShoppingCartActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun goParent() {
-        val intent = Intent(this, ProfilActivity::class.java)
-        startActivity(intent)
     }
 
 

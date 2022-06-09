@@ -86,13 +86,14 @@ forgot!!.setOnClickListener(object :View.OnClickListener{
                             else{
                             jwt =  response.body()!!
                             println(jwt.jwtToken.toString()+"*************")
-                          preferences.createloginsession(jwt.jwtToken.toString(), jwt.user?.id!!,jwt.user?.type!!)
+                          preferences.createloginsession(jwt.jwtToken.toString(), jwt.user?.id!!)
 
                             goToSecondActivity()}
                         }
 
                         override fun onFailure(call: Call<JwtResponse>, t: Throwable) {
                            println(t.message)
+                            println("errrrrror")
                         }
                     })
 

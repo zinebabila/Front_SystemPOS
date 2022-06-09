@@ -61,6 +61,13 @@
             >
         </activity>
         <activity
+            android:name=".NotificationActivity"
+            android:exported="true"
+            android:parentActivityName=".ProfilActivity"
+
+            >
+        </activity>
+        <activity
             android:name=".AddProductActivity"
             android:exported="true"
             android:parentActivityName=".ProfilActivity"

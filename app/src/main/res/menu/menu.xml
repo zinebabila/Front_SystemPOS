@@ -9,10 +9,9 @@
         app:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/notification"
-        android:icon="@drawable/ic_menu_notifications"
-        app:actionViewClass="android.widget.ImageButton"
-        android:title="favorit"
-        app:showAsAction="ifRoom"/>
+        android:icon="@drawable/ic_bell"
+        app:showAsAction="ifRoom"
+        android:title="Notification" />
 
     <item android:id="@+id/action_settings"
         android:title="settings"
