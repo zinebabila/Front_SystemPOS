@@ -275,7 +275,7 @@ class ShoppingCartActivity : AppCompatActivity()
             .build()
 
         val request = Request.Builder()
-            .url("http://192.168.86.32:9090/data/subscribes")
+            .url("http://192.168.2.106:9090/data/subscribes")
             // .header("Accept", "application/json; q=0.5")
             // .addHeader("Accept", "text/event-stream")
 
@@ -475,6 +475,7 @@ class ShoppingCartActivity : AppCompatActivity()
                 merchant = response.body()!!
                 println(merchant)
                 println(merchant.currencies)
+                //println(merchant.currencies[1].currencyName)
 
 
                 val dialogBuilder = AlertDialog.Builder(this@ShoppingCartActivity)

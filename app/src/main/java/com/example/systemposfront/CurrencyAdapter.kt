@@ -77,6 +77,7 @@ class CurrencyAdapter(var context: Context, var currencys: List<Currency> = arra
         var first:String?=null
         var last:String?=null
         var nomcurenc:String ?= null
+        var nameCurr:String?=null
 
         private lateinit var client: OkHttpClient
         private lateinit var apimerchant:MerchantController
@@ -100,7 +101,8 @@ class CurrencyAdapter(var context: Context, var currencys: List<Currency> = arra
             Picasso.get().load(product.imageCurrency).fit().into(itemImage)
 
             curenc = product.id!!
-            nomcurenc=product.currencyName!!
+            nomcurenc=product.symbol!!
+            nameCurr=product.currencyName!!
             cart.setOnClickListener(OnClickListener {
 
 
@@ -254,7 +256,7 @@ class CurrencyAdapter(var context: Context, var currencys: List<Currency> = arra
                     var str_response = response.body!!.string()
                     //creating json object
                     val parser: JSONObject = JSONObject(str_response)
-                    var tether=parser.getJSONObject(nomcurenc).getString("usd").toDouble()
+                    var tether=parser.getJSONObject(nameCurr?.lowercase()).getString("usd").toDouble()
 
                     println("imppppppppppppppppppppppppppppppportant")
                     println(tether)

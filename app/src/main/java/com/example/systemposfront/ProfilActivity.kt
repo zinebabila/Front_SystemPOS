@@ -3,7 +3,11 @@ package com.example.systemposfront
 
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -33,8 +37,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 import io.paperdb.Paper
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.net.URL
 
 
 class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -80,31 +89,50 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
         /***********************les information du compte**********************/
         AccountEnd.authToken = session.gettokenDetails()
+        apimerchant = AccountEnd.retrofit.create(MerchantController::class.java)
+        apimerchant.getMerchant(session.getidAccount()).enqueue(object : retrofit2.Callback<Merchant> {
+            override fun onResponse(call: Call<Merchant>, response: Response<Merchant>) {
+                if (response.body() != null) {
+                    var merchant = response.body()!!
+                    println(merchant.firstName!!)
+                    detail.text =
+                        merchant.firstName + "  " + merchant.lastName + "\n" + merchant.numTel
+                    session.addinfo(merchant.firstName!!,merchant.lastName!!)
+                    if(merchant.image!=null) {
+                        val SDK_INT = Build.VERSION.SDK_INT
+                        if (SDK_INT > 8) {
+                            val policy = StrictMode.ThreadPolicy.Builder()
+                                .permitAll().build()
+                            StrictMode.setThreadPolicy(policy)
+                            val `in`: InputStream =
+                                URL("http://192.168.2.106:9099/images/get/" + merchant.image?.id!!).openConnection()
+                                    .getInputStream()
+                            var profilePic = BitmapFactory.decodeStream(`in`)
 
-            apimerchant = AccountEnd.retrofit.create(MerchantController::class.java)
-            apimerchant.getMerchant(session.getidAccount()).enqueue(object : retrofit2.Callback<Merchant> {
-                override fun onResponse(call: Call<Merchant>, response: Response<Merchant>) {
-                    println(response.body()!!.firstName)
-                    println(response.body()!!.lastName)
-                    if (response.body() != null) {
-                        var merchant = response.body()!!
+                            val stream = ByteArrayOutputStream()
+                            profilePic.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
-                        Picasso.get().load(merchant.urlImage).fit().into(imagePro)
-                        detail.text =
-                            merchant.firstName + "  " + merchant.lastName + "\n" + merchant.numTel
-                        session.addinfo(merchant.firstName!!,merchant.lastName!!)
-
-                    } else {
-                        println("error")
+                            imagePro.setImageBitmap(profilePic)
+                            // imagePro.setImageBitmap(StringToBitMap(response.body()!!))
+                        }
                     }
 
+
+
+
+
+
+                } else {
+                    println("error")
                 }
 
-                override fun onFailure(call: Call<Merchant>, t: Throwable) {
-                  //  println(t.message)
-                }
+            }
 
-            })
+            override fun onFailure(call: Call<Merchant>, t: Throwable) {
+                println(t.message)
+            }
+
+        })
 
 
 
@@ -160,20 +188,22 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     fun getProducts() {
-        // var products_recyclerview: RecyclerView = findViewById(R.id.products_recyclerview)
-        //  products_recyclerview.layoutManager =
-        //    StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         val recyclerView = findViewById<RecyclerView>(R.id.products_recyclerview)
         recyclerView.setHasFixedSize(true)
-        // val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
         recyclerView.layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        apiService.getProducts().enqueue(object : retrofit2.Callback<ArrayList<Product>> {
+
+       /* val requestid= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),"2")
+        val requestpage= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "1")
+        val requestsize= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "500")
+        val requestsorted= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "id")
+        val requestreverse= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "true")*/
+        apiService.getProducts(session.getidAccount()).enqueue(object : retrofit2.Callback<ArrayList<Product>> {
             // apiService.getCategorie().enqueue(object : retrofit2.Callback<List<Category>> {
             override fun onFailure(call: Call<ArrayList<Product>>, t: Throwable) {
 
                 println(t.message + "*******************************")
-               // t.message?.let { Log.d("Data error", it) }
+                t.message?.let { Log.d("Data error", it) }
 
             }
 
@@ -182,17 +212,15 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 response: Response<ArrayList<Product>>
             ) {
 
-                products = response.body()!!
-                println(products)
-
-                productAdapter = MovieAdapter(products)
-                // recyclerView.layoutManager = layoutManager
-                recyclerView.adapter = productAdapter
-
-                // productAdapter = ProductAdapter(this@ProfilActivity, products)
-                // products_recyclerview.adapter = productAdapter
-                // productAdapter.notifyDataSetChanged()
-
+                if(response.body()!=null) {
+                    products = response.body()!!
+                    println(products)
+                    productAdapter = MovieAdapter(products as ArrayList<Product>)
+                    recyclerView.adapter = productAdapter
+                }
+                else{
+                    println("il y a rien")
+                }
             }
 
         })
@@ -204,16 +232,18 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
     }
     private fun getproductcat(id: Long): Int {
-
-        //  var products_recyclerview: RecyclerView = findViewById(R.id.products_recyclerview)
-        //  products_recyclerview.layoutManager =
-        //     StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         val recyclerView = findViewById<RecyclerView>(R.id.products_recyclerview)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+      /*  val requestidcat= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),id.toString())
+        val requestid= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),"1")
+        val requestpage= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "1")
+        val requestsize= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "500")
+        val requestsorted= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "id")
+        val requestreverse= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "true")*/
 
-        apiService.getProductCat(id).enqueue(object : retrofit2.Callback<ArrayList<Product>> {
+        apiService.getProductCat(session.getidAccount(),id).enqueue(object : retrofit2.Callback<ArrayList<Product>> {
             // apiService.getCategorie().enqueue(object : retrofit2.Callback<List<Category>> {
             override fun onFailure(call: Call<ArrayList<Product>>, t: Throwable) {
 
@@ -224,16 +254,10 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
             override fun onResponse(call: Call<ArrayList<Product>>, response: Response<ArrayList<Product>>)
             {
-                products = (response.body() )!!
+                products = response.body()!!
                 println(products)
-                productAdapter = MovieAdapter(products)
-
+                productAdapter = MovieAdapter(products as ArrayList<Product>)
                 recyclerView.adapter = productAdapter
-
-                //productAdapter = ProductAdapter(this@ProfilActivity, products)
-                //products_recyclerview.adapter = productAdapter
-                // productAdapter.notifyDataSetChanged()
-
             }
 
         })
