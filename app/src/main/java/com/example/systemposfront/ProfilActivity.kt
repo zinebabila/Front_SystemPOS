@@ -98,30 +98,7 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
                     detail.text =
                         merchant.firstName + "  " + merchant.lastName + "\n" + merchant.numTel
                     session.addinfo(merchant.firstName!!,merchant.lastName!!)
-                    if(merchant.image!=null) {
-                        val SDK_INT = Build.VERSION.SDK_INT
-                        if (SDK_INT > 8) {
-                            val policy = StrictMode.ThreadPolicy.Builder()
-                                .permitAll().build()
-                            StrictMode.setThreadPolicy(policy)
-                            val `in`: InputStream =
-                                URL("http://192.168.2.106:9099/images/get/" + merchant.image?.id!!).openConnection()
-                                    .getInputStream()
-                            var profilePic = BitmapFactory.decodeStream(`in`)
-
-                            val stream = ByteArrayOutputStream()
-                            profilePic.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
-                            imagePro.setImageBitmap(profilePic)
-                            // imagePro.setImageBitmap(StringToBitMap(response.body()!!))
-                        }
-                    }
-
-
-
-
-
-
+                    Picasso.get().load(merchant.image?.Url).into(imagePro)
                 } else {
                     println("error")
                 }

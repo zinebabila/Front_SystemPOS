@@ -275,7 +275,7 @@ class ShoppingCartActivity : AppCompatActivity()
             .build()
 
         val request = Request.Builder()
-            .url("http://192.168.2.106:9090/data/subscribes")
+            .url("http://192.168.86.23:9090/data/subscribes")
             // .header("Accept", "application/json; q=0.5")
             // .addHeader("Accept", "text/event-stream")
 
