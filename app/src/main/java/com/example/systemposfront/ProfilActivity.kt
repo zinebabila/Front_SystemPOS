@@ -62,6 +62,7 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
     private var products = ArrayList<Product>()
     lateinit var menuNav: Menu
     lateinit var mNavigationView: NavigationView
+    lateinit var recyclerView:RecyclerView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Paper.init(this)
@@ -86,7 +87,9 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
         var imagePro=header.findViewById<ImageView>(R.id.nav_header_imageView)
         var detail=header.findViewById<TextView>(R.id.nav_header_textView)
 
-
+         recyclerView = findViewById(R.id.products_recyclerview)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         /***********************les information du compte**********************/
         AccountEnd.authToken = session.gettokenDetails()
         apimerchant = AccountEnd.retrofit.create(MerchantController::class.java)
@@ -127,8 +130,15 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
         /***************************les produits****************************************/
-        apiService = AccountEnd.retrofit.create(ProductController::class.java)
-        getProducts()
+        if (intent.hasExtra("action")) {
+            apiService = AccountEnd.retrofit.create(ProductController::class.java)
+            getproductcat(intent.getLongExtra("id",0L))
+            }
+        else{
+            apiService = AccountEnd.retrofit.create(ProductController::class.java)
+            getProducts()
+        }
+
 
 
         val showCart : FloatingActionButton =findViewById(R.id.basketButton)
@@ -151,11 +161,11 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 println("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
                 cats = response.body()!!
                 println(cats)
-                menuNav.add(0, 0,0,"Tous Categorie")
+                menuNav.add(2, 0,0,"Tous Categorie")
 
                 for (name in cats) {
                     println("${name.nameCategory}" + "****************************************************************")
-                    menuNav.add(0, "${name.id?.toInt()}".toInt(),0,"${name.nameCategory}")
+                    menuNav.add( 2, "${name.id?.toInt()}".toInt(),0,"${name.nameCategory}")
                     // menuNav.add("${name.nameCategory}")
 
                 }
@@ -165,10 +175,7 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     fun getProducts() {
-        val recyclerView = findViewById<RecyclerView>(R.id.products_recyclerview)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+
 
        /* val requestid= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),"2")
         val requestpage= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "1")
@@ -209,18 +216,15 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
     }
     private fun getproductcat(id: Long): Int {
-        val recyclerView = findViewById<RecyclerView>(R.id.products_recyclerview)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
       /*  val requestidcat= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),id.toString())
         val requestid= RequestBody.create("multipart/form-data".toMediaTypeOrNull(),"1")
         val requestpage= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "1")
         val requestsize= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "500")
         val requestsorted= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "id")
         val requestreverse= RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "true")*/
-
-        apiService.getProductCat(session.getidAccount(),id).enqueue(object : retrofit2.Callback<ArrayList<Product>> {
+        AccountEnd.authToken=session.gettokenDetails()
+        apiService = AccountEnd.retrofit.create(ProductController::class.java)
+        apiService.getProductCat(id,session.getidAccount()).enqueue(object : retrofit2.Callback<ArrayList<Product>> {
             // apiService.getCategorie().enqueue(object : retrofit2.Callback<List<Category>> {
             override fun onFailure(call: Call<ArrayList<Product>>, t: Throwable) {
 
@@ -242,25 +246,24 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if(item.itemId!=R.id.pp&&item.itemId!=R.id.addProduct&&item.itemId!=R.id.addCat){
+
             if(item.itemId==0){
                 apiService = AccountEnd.retrofit.create(ProductController::class.java)
                 getProducts()
                 drawer.closeDrawer(GravityCompat.START)
                 return true
             }
-            else{
-                AccountEnd.authToken=session.gettokenDetails()
-                apiService = AccountEnd.retrofit.create(ProductController::class.java)
-                getproductcat(item.itemId.toLong())
+            if(item.itemId!=0&&item.itemId!=R.id.addProduct&&item.itemId!=R.id.addCat){
+
+                goSame(item.itemId.toLong())
                 drawer.closeDrawer(GravityCompat.START)
                 return true}
-        }
-        if(item.itemId==R.id.addProduct){
+
+         if(item.itemId==R.id.addProduct){
             goToSecondActivity("addproduct")
             return true
         }
-        if(item.itemId==R.id.addCat){
+         if(item.itemId==R.id.addCat){
             goToSecondActivity("addCategorie")
             return true
         }
@@ -283,20 +286,21 @@ class ProfilActivity: AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
 
     }
+    private fun goSame(id:Long) {
+        val bundle = Bundle()
+        val intent = Intent(this, ProfilActivity::class.java)
+        bundle.putString("action", "faillure")
+        bundle.putLong("id", id)
+        intent.putExtras(bundle)
 
+        startActivity(intent)
+    }
     fun modifiercounter() {
         cart_size.text = ShoppingCart.getShoppingCartSize().toString()
         println(ShoppingCart.getShoppingCartSize().toString()+"--------------------------------------")
     }
 
-    private  fun setUpRecyclerView() {
-        val recyclerView = findViewById<RecyclerView>(R.id.products_recyclerview)
-        recyclerView.setHasFixedSize(true)
-        val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
-        productAdapter = MovieAdapter(products)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = productAdapter
-    }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
